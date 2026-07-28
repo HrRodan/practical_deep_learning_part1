@@ -1,0 +1,15 @@
+{
+  "id": "hrrodan/is-it-a-bird-creating-a-model-from-your-own-data",
+  "title": "Is It A Bird Creating A Model From Your Own Data",
+  "code_file": "is-it-a-bird-creating-a-model-from-your-own-data.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
