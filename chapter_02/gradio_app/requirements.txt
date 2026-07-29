@@ -1,0 +1,6 @@
+fastai==2.7.19
+fastcore==1.6.9
+gradio==6.21.0
+pillow==12.2.0
+torch>=2.0.0
+torchvision>=0.15.0
