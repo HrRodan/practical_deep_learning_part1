@@ -14,6 +14,17 @@ __main__.is_cat = is_cat
 model_path = Path(__file__).parent / "model.pkl"
 learn = load_learner(model_path)
 
+try:
+    import spaces
+except ImportError:
+    class spaces:
+        @staticmethod
+        def GPU(func=None, **kwargs):
+            if func is None:
+                return lambda f: f
+            return func
+
+@spaces.GPU
 def classify_image(img):
     if img is None:
         return None
