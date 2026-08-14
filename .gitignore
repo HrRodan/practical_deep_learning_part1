@@ -4,8 +4,19 @@ forest.jpg
 *.csv
 *.pkl
 *.zip
+*.pth
+*.pt
+*.bin
+*.onnx
+catboost_info/
+**/catboost_info/
+data/
+**/data/
+outputs/
+**/outputs/
+models/
+**/models/
 us-patent-phrase-to-phrase-matching*
-paddy-disease-classification/
 bird_or_not/
 
 *.swp

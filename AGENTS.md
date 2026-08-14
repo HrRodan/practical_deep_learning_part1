@@ -1,97 +1,3 @@
-# Working with the Kaggle CLI: Agent Guide
-
-This document provides guidelines, workflows, and rules for working with Kaggle notebooks and CLI via `uv run kaggle`.
-
----
-
-## 1. Overview & Setup
-
-- **Invocation**: Always execute Kaggle CLI commands through `uv run kaggle`.
-- **Authentication**: Kaggle API credentials are automatically sourced from `~/.kaggle/kaggle.json`.
-- **Verify Credentials**: `uv run kaggle config view`
-
----
-
-## 2. Kaggle Notebooks Workflow
-
-### Step 1: Initialize Metadata
-Generate `kernel-metadata.json` in the target folder:
-```bash
-uv run kaggle kernels init -p <folder_path>
-```
-
-### Step 2: Configure `kernel-metadata.json`
-```json
-{
-  "id": "<username>/<kernel-slug>",
-  "title": "Notebook Title",
-  "code_file": "notebook-name.ipynb",
-  "language": "python",
-  "kernel_type": "notebook",
-  "is_private": "true",
-  "enable_gpu": "false",
-  "enable_tpu": "false",
-  "enable_internet": "true",
-  "dataset_sources": [],
-  "competition_sources": [],
-  "kernel_sources": [],
-  "model_sources": []
-}
-```
-
-### Step 3: Push Notebook
-Upload notebook code and metadata to run remotely on Kaggle:
-```bash
-uv run kaggle kernels push -p <folder_path>
-```
-
-### Step 4: Monitor Status & Debug
-Check run status (`COMPLETE`, `RUNNING`, `ERROR`):
-```bash
-uv run kaggle kernels status <username>/<kernel-slug>
-```
-If status is `ERROR`, inspect execution logs:
-```bash
-uv run kaggle kernels logs <username>/<kernel-slug>
-```
-
-### Step 5: Download Outputs & List Files
-- **List output files**: `uv run kaggle kernels files <username>/<kernel-slug>`
-- **Download all outputs**: `uv run kaggle kernels output <username>/<kernel-slug> -p <path>`
-- **Filter output files**: `uv run kaggle kernels output <username>/<kernel-slug> --file-pattern ".*\.png$"`
-
-### Step 6: Pull Remote Notebook
-Download local copy of notebook and metadata (optionally specify a version):
-```bash
-uv run kaggle kernels pull <username>/<kernel-slug>[/version] -p <folder_path> -m
-```
-
----
-
-## 3. Short & Concise Rules for Notebooks
-
-1. **Metadata String Booleans**: Always format boolean flags in `kernel-metadata.json` (`is_private`, `enable_gpu`, `enable_internet`) as string booleans (`"true"` / `"false"`).
-2. **Indented Magics Only**: Never place IPython `!` magics on the same line as Python statements (e.g. `if condition: !pip install`). Put `!` on its own indented line to avoid Papermill syntax errors.
-3. **Avoid CUDA/Torch Reinstalls**: Do not `--upgrade` pre-installed ML packages (`torch`, `fastai`). Only install missing lightweight libraries to prevent driver collisions.
-4. **Default to CPU for Small Models**: Use `"enable_gpu": "false"` for small models or quick tests to bypass GPU queue wait times.
-5. **Kaggle Secrets**: Define secrets via Kaggle web UI (**Add-ons** -> **Secrets**). Access in notebook code using `from kaggle_secrets import UserSecretsClient; secret = UserSecretsClient().get_secret("KEY")`. *(Note: works in Kaggle execution environment only)*.
-6. **Robust Image Fetching**: Always download with fallback/retry loops (`max_images=10`) to handle dead or protected links.
-7. **Deletion**: Delete remote kernels when necessary using `uv run kaggle kernels delete <username>/<kernel-slug> -y`.
-
----
-
-## 4. Kaggle CLI Reference Commands
-
-| Action | Command |
-| :--- | :--- |
-| **List User Kernels** | `uv run kaggle kernels list -m` |
-| **Search Kernels** | `uv run kaggle kernels list --user <user> --language python` |
-| **Pull Kernel & Metadata** | `uv run kaggle kernels pull <owner>/<slug> -p . -m` |
-| **List Output Files** | `uv run kaggle kernels files <owner>/<slug>` |
-| **Download Outputs** | `uv run kaggle kernels output <owner>/<slug> -p /path` |
-| **Delete Kernel** | `uv run kaggle kernels delete <owner>/<slug> -y` |
-| **List Competitions** | `uv run kaggle competitions list` |
-| **Download Dataset** | `uv run kaggle datasets download -d <owner>/<dataset> --unzip` |
 
 
 # Use UV as package manager
@@ -110,46 +16,51 @@ The package and project manager is uv. Run scripts with "uv run script.py" Impor
 | **`uv tree`** | `uv tree` | Display the dependency graph visually. |
 | **`uv pip install`** | `uv pip install numpy` | Low-level, fast package install (classic pip style). |
 
-# System Prompt: Senior Architect Coding Agent
-
-**Role:** You are a Senior Software Architect and Production-Grade Engineer. Your goal is to design and implement thoughtful, stable, and maintainable changes.
-
-## Core Principles
-* **Modernity:** Always use the latest stable package versions, frameworks, and AI models (Current Date: April 2026). Actively avoid deprecated methods.
-* **Simplicity First:** Write the minimum code required to solve the problem. Avoid cleverness, unnecessary abstractions, and speculative features.
-* **Root Cause Resolution:** No laziness, temporary patches, or "make it work" bandaids.
-* **Surgical Changes:** Touch only what you must. Ensure changes are cohesive and traceable directly to the user's request.
-
-## 1. Architect Before Coding (Plan Mode)
-Do not jump immediately into implementation. For any task requiring 3+ steps or architectural decisions, default to **Plan Mode**.
-* **Don't Assume:** If requirements are ambiguous or multiple interpretations exist, present them and ask. Do not pick silently.
-* **Evaluate Risks:** Explicitly call out tradeoffs, edge cases, and potential breaking changes.
-* **Propose Solutions:** Recommend a primary approach and 1–2 alternatives when relevant. 
-
-## 2. Strict Scope Discipline
-* **Stay in Bounds:** Do not refactor, rename, reorganize, or "clean up" unrelated code or formatting without explicit permission.
-* **Orphan Management:** Remove imports, variables, or functions that *your* changes made unused. Do not touch pre-existing dead code.
-* **Flag Scope Creep:** If an out-of-scope change is necessary for correctness, explain why and get approval first. Report unrelated bugs discovered as separate issues.
-
-## 3. Goal-Driven Execution & Verification
-Transform tasks into verifiable goals and loop until verified. Never mark a task complete without proving it works.
-* **Micro-Verification:** Outline multi-step tasks with explicit verification checkpoints: `Step 1: [Action] → Verify: [Check]`.
-* **Pivot when Failing:** If a solution goes sideways during execution, STOP and re-plan immediately. Do not force broken solutions.
-* **Testing:** Write and run UNIT tests (Integration Tests *only* if explicitly requested) before considering a task done. Ensure tests pass before and after refactoring.
-
-## 4. Production-Ready Standards
-* **Completeness:** Include error handling, logging/metrics hooks, type hints, and comments on complex logic. 
-* **Documentation (critical):** Update or create all relevant docs (especially `README.md`, docstrings, module docstrings) alongside implementation.
-* **No AI Slop:** Remove all unnecessary comments and AI reasoning artifacts from the final code output. Match the existing codebase style perfectly.
-
-## Required Communication Format
-Unless instructed otherwise, structure your responses using this hierarchy:
-1.  **Understanding & Scope:** Brief summary and upfront specs to reduce ambiguity.
-2.  **System Impact:** Files, modules, and dependencies affected.
-3.  **Plan:** Step-by-step approach with verification checks.
-4.  **Open Questions / Tradeoffs:** Clarifications needed or assumptions made.
-5.  **Implementation:** Output code *only* after we are aligned on steps 1–4.
-
 # Actuality
 
-Current month is July in 2026
+Current month is August in 2026
+
+# Kaggle and Machine Learning Work
+
+For Kaggle competitions or machine-learning problems, always use the
+`$kaggle-notebook-ml` skill.
+
+- Treat Kaggle as the primary execution environment. Use local execution only
+  for small inspections, unit checks, and debug smoke tests.
+- Create a Kaggle-compatible, top-to-bottom runnable Jupyter notebook as the
+  primary deliverable. Keep the user informed through visual data exploration,
+  Markdown explanations, and concise progress updates.
+- Never search for competition solutions, winning notebooks, leaked labels, or
+  competition-specific code. Research only official documentation and
+  general-purpose methods.
+- Use Context7 for current library and API documentation.
+- Run all Kaggle CLI commands through `uv run kaggle`.
+- Design and justify validation before model selection; actively check for
+  target leakage, duplicates, groups, temporal dependencies, and train/test
+  distribution shift.
+- Prefer robust validation over public-leaderboard optimization. Record every
+  material experiment, decision, runtime, and submission in `decision_log.md`.
+- Use remote Kaggle execution for meaningful training, inference, and
+  submission generation. Verify every final notebook in a fresh Kaggle session.
+- Stop and ask the user when authentication, competition acceptance, Kaggle
+  resources, data permissions, or a material modeling choice requires their
+  action or decision.
+- Never delete remote Kaggle notebooks or submit competition predictions unless
+  the user has explicitly authorized the action.
+
+## Kaggle Remote GPU Execution & Dual T4 (2x T4) Optimization
+
+1. **Explicit GPU Accelerator Flag & Metadata**:
+   - Always push GPU notebooks using `--accelerator nvidiaTeslaT4x2` (or `--accelerator nvidiaTeslaT4`).
+   - Always specify `"enable_gpu": "true"` and `"machine_shape": "nvidiaTeslaT4x2"` in `kernel-metadata.json`.
+2. **Strict Hardware Verification**:
+   - Notebooks must strictly verify GPU hardware at startup (`torch.cuda.device_count() >= 1` and `sm_70+` architecture like T4).
+   - If GPU is unavailable or legacy P100 (`sm_60`) is detected, halt immediately with a descriptive `RuntimeError`.
+3. **Dual T4 Parallelism Optimization**:
+   - For multi-fold CV or multi-model ensembles on Dual T4:
+     - Use process-level fold/model parallelism (`multiprocessing` assigning Fold $i$ to GPU 0 and Fold $i+1$ to GPU 1) to achieve linear $2\times$ training speedup without PCIe communication bottlenecks.
+     - Alternatively, use `torch.nn.DataParallel` or FastAI distributed dataloaders for per-batch dual-GPU data parallelism.
+4. **Notebook `kernelspec` Metadata**:
+   - Ensure notebook metadata contains `kernelspec` (`{"name": "python3", "display_name": "Python 3", "language": "python"}`) to prevent Papermill crashes.
+5. **No CUDA/Torch Overwrites**:
+   - Install missing packages strictly with `--no-deps` (`!pip install -q --no-deps timm`). Never upgrade or overwrite `torch` or `torchvision` in remote kernels.

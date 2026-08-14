@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaggle Notebook ML"
+  short_description: "Build verified Kaggle ML notebooks"
+  default_prompt: "Use $kaggle-notebook-ml to solve this Kaggle machine-learning problem in a clear, reproducible notebook."

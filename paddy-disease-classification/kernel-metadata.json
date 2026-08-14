@@ -1,0 +1,18 @@
+{
+  "id": "hrrodan/paddy-disease-fastai-dual-t4-ensemble",
+  "title": "Paddy Disease FastAI Dual T4 Ensemble",
+  "code_file": "paddy_solution.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "machine_shape": "nvidiaTeslaT4x2",
+  "dataset_sources": [],
+  "competition_sources": [
+    "paddy-disease-classification"
+  ],
+  "kernel_sources": [],
+  "model_sources": []
+}
