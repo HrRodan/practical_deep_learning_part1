@@ -69,6 +69,8 @@ Include:
 - Clear artifact paths for checkpoints, out-of-fold predictions, plots, logs, and `submission.csv` under `/kaggle/working`.
 - CPU-safe fallback settings and optional GPU/mixed-precision settings that activate only when supported.
 
+Before a large Kaggle run, establish a safe resource envelope with the real input shape and intended data loader: run a few batches or short epochs, measure GPU/RAM usage and throughput, then choose a batch size with headroom. Use mixed precision when it is numerically suitable; reduce batch size, resolution, sequence length, workers, cache size, or model size before risking an out-of-memory run. Use gradient accumulation when it preserves a useful effective batch size under memory constraints, and record the micro-batch size, accumulation steps, effective batch size, and any scheduler adjustment. Avoid redundant dataset copies and release unneeded models, tensors, and caches between trials.
+
 For a GPU-required workload, enable an explicit `REQUIRE_T4_GPU` configuration, print every allocated GPU name and count, and raise a fatal error unless NVIDIA T4 hardware is available. Push with a matching explicit accelerator and metadata. Follow the package, input-path, fallback-download, and secret-handling rules in [references/kaggle-cli-ci.md](references/kaggle-cli-ci.md).
 
 Prefer reusable functions or small Python modules for data loading, preprocessing, metrics, training, and inference. Keep the notebook as the clear narrative and orchestration layer; do not copy large implementations across cells.
@@ -101,7 +103,9 @@ Save split assignments or the deterministic split definition. Explain why the va
 
 Create a fast, complete pipeline that loads data, preprocesses it, trains, evaluates the exact metric, predicts test data, and writes a valid submission. First run it in `DEBUG` mode, then run the comparable full version on Kaggle.
 
-Verify that the model can overfit a tiny subset when feasible. Treat failure as a pipeline or data bug before changing models. Report score, fold variance, runtime, hardware, and resource constraints to the user.
+Start with the smallest sensible model and a run that completes in minutes. Verify that the model can overfit a tiny subset when feasible. Treat failure as a pipeline or data bug before changing models. Report score, fold variance, runtime, hardware, and resource constraints to the user.
+
+Scale incrementally. Before committing to a larger architecture, larger resolution, more folds, or long training, probe it with representative samples and a few batches or short epochs. Confirm correctness, memory use, throughput, learning behavior, and a plausible validation signal. Only then increase one cost driver at a time and schedule the full training run. Do not begin expensive, long-running training early merely because a larger model is available.
 
 ### 4. Diagnose errors, then improve
 
@@ -140,6 +144,7 @@ Complete the work only when all applicable conditions hold:
 - Data findings are shown and interpreted; validation is justified and leakage-safe.
 - A complete baseline and several credible, documented improvements were evaluated.
 - Model behavior and important errors were analyzed.
+- The resource envelope was measured before every large Kaggle run; final training completed without avoidable out-of-memory failures.
 - Failed ideas, final configuration, artifacts, and submission history are recorded in `decision_log.md`.
 - The user receives the final score evidence, caveats, and evidence-based next steps.
 
